@@ -14,10 +14,10 @@ Sistema web para encurtar URLs e gerenciar redirecionamentos com geração autom
 
 Estrutura em camadas desacopladas:
 
-Domain/ → Entidades, interfaces
-Application/ → Casos de uso, DTOs, serviços
-Infrastructure/ → Repositórios, Dapper
-API/ → Controllers, endpoints
+- **Domain/** → Entidades, interfaces
+- **Application/** → Casos de uso, DTOs, serviços
+- **Infrastructure/** → Repositórios, Dapper
+- **API/** → Controllers, endpoints
 
 ### Fluxo de Encurtamento
 
@@ -96,7 +96,3 @@ dotnet publish -c Release -o C:\inetpub\wwwroot\url-shortener
 ```
 
 Criar Application Pool (.NET CLR: "No Managed Code"), dar permissão ao arquivo `.db`.
-
----
-
-**Gabriel Straube** | ga.straube@gmail.com
