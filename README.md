@@ -53,9 +53,19 @@ docker-compose up
 
 ## Decisões Técnicas
 
-Optei por **Base62 em vez de UUID** para manter aliases curtos (5-8 caracteres vs 36). Além disso, usei **sequência numérica monotônica** em vez de aleatório puro: garante zero collisions, evita retry logic e oferece performance previsível. O custo é previsibilidade dos aliases, aceitável para este caso de uso.
+Escolhi **Base62 em vez de UUID** para manter aliases curtos (5-8 caracteres vs 36). Além disso, usei **sequência numérica monotônica** em vez de aleatório puro: com isso garanto zero collisions, evito retry logic e tenho performance previsível. O trade-off é a previsibilidade dos aliases, o que considero aceitável para este caso de uso.
 
-Escolhi **Dapper em vez de EF Core puro** porque o projeto é simples e SQL direto é mais legível e performático. **Minimal API para o endpoint de redirect** reduz boilerplate e o regex constraint resolve roteamento limpo sem conflitar com arquivos estáticos. O **frontend servido pela API** permite deploy único e simplicidade, aceitando o trade-off de acoplamento.
+Usei **`SemaphoreSlim(1, 1)`** no motor de geração para processar uma requisição por vez, conforme requisito. Preferi `SemaphoreSlim` em vez de `lock` porque o corpo do método contém `await` — e `lock` não é compatível com código assíncrono em C#. Envolvi toda a operação (geração do alias + persistência) no semáforo, eliminando a race condition entre verificar disponibilidade e salvar.
+
+Optei por **Dapper em vez de EF Core puro** pela legibilidade e performance do SQL direto num projeto simples. Usei **Minimal API para o endpoint de redirect** para reduzir boilerplate e resolvi o roteamento com regex constraint, evitando conflito com arquivos estáticos. Decidi servir o **frontend pela própria API** para simplificar o deploy, aceitando o trade-off de acoplamento.
+
+## O que faria diferente com mais tempo
+
+Os testes cobrem só o `Base62Service` — com mais tempo escreveria testes de integração para o fluxo completo de encurtamento e redirect, e testes de concorrência para validar o `SemaphoreSlim` sob carga real, não só na teoria.
+
+O `SemaphoreSlim` resolve a requisição de serialização, mas vira gargalo se o volume crescer. Com mais tempo avaliaria mover a geração de alias para uma fila interna ou usar um contador atômico com `Interlocked`, mantendo a garantia de unicidade sem bloquear todas as requisições.
+
+Adicionaria também expiração de URLs e alguma forma de o usuário gerenciar os próprios links — hoje não tem nem autenticação básica.
 
 ## Testes
 
