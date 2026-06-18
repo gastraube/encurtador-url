@@ -53,48 +53,9 @@ docker-compose up
 
 ## Decisões Técnicas
 
-### Base62 em vez de UUID
+Optei por **Base62 em vez de UUID** para manter aliases curtos (5-8 caracteres vs 36). Além disso, usei **sequência numérica monotônica** em vez de aleatório puro: garante zero collisions, evita retry logic e oferece performance previsível. O custo é previsibilidade dos aliases, aceitável para este caso de uso.
 
-- UUID: 36 caracteres, globalmente único
-- Base62: 5-8 caracteres, suficiente para sequência monotônica
-- **Escolha:** Base62 → URLs mais curtas
-
-### Sequência numérica em vez de aleatório
-
-- Sequência: zero collisions, sem retry
-- Aleatório: menos previsível, precisa validar
-- **Escolha:** Sequência → performance garantida
-
-### Dapper em vez de EF Core puro
-
-- EF Core: abstração total, mais lento em queries simples
-- Dapper: SQL direto, máxima performance
-- **Escolha:** Dapper → projeto é simples, SQL é legível
-
-### Minimal API para redirect
-
-- Controller: mais estruturado, overhead
-- Minimal API: enxuto, sem boilerplate
-- **Escolha:** Minimal API → endpoint simples, roteamento limpo com regex
-
-### Frontend servido pela API
-
-- Separado: melhor escalabilidade
-- Junto: deploy único, CORS desnecessário
-- **Escolha:** Junto → simplicidade no desafio
-
-## O que não foi feito (com mais tempo)
-
-- Autenticação JWT
-- Rate limiting
-- Analytics (geo, device, referrer)
-- Alias sugestão
-- Expiration de URLs
-- Admin dashboard
-- QR code
-- Custom domain
-- Bulk operations
-- Preview de destino
+Escolhi **Dapper em vez de EF Core puro** porque o projeto é simples e SQL direto é mais legível e performático. **Minimal API para o endpoint de redirect** reduz boilerplate e o regex constraint resolve roteamento limpo sem conflitar com arquivos estáticos. O **frontend servido pela API** permite deploy único e simplicidade, aceitando o trade-off de acoplamento.
 
 ## Testes
 
@@ -135,3 +96,7 @@ dotnet publish -c Release -o C:\inetpub\wwwroot\url-shortener
 ```
 
 Criar Application Pool (.NET CLR: "No Managed Code"), dar permissão ao arquivo `.db`.
+
+---
+
+**Gabriel Straube** | ga.straube@gmail.com
